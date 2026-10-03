@@ -1,0 +1,30 @@
+# Windows file version details for ThreadsCollage.exe
+# (right click the exe > Properties > Details). Used by build_exe.bat.
+# These describe the LAUNCHER, which is built once. The app inside updates
+# separately; its version is shown in the app's About window.
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 2, 0, 0),
+    prodvers=(1, 2, 0, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable('040904B0', [
+        StringStruct('FileDescription', 'Threads Collage'),
+        StringStruct('FileVersion', '1.2.0'),
+        StringStruct('InternalName', 'ThreadsCollage'),
+        StringStruct('OriginalFilename', 'ThreadsCollage.exe'),
+        StringStruct('ProductName', 'Threads Collage (launcher; app version shown in About)'),
+        StringStruct('ProductVersion', '1.2.0'),
+        StringStruct('Comments', 'Collages of 2 or 3 photos for Threads, sRGB JPEG')
+      ])
+    ]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)

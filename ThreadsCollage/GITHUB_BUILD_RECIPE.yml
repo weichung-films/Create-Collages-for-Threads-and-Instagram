@@ -1,0 +1,111 @@
+# Threads Collage: builds ready to install packages on GitHub's own machines.
+#   * Mac disk images for Apple Silicon and for Intel (.dmg)
+#   * Windows installer (ThreadsCollage_Setup_<version>.exe)
+#   * the update file (threads_collage.py) for computers that already have the app
+# Everything is published on this repository's Releases page.
+# Runs automatically whenever files are uploaded, or by hand from the Actions tab.
+name: Build installers
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    name: Mac (${{ matrix.chip }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            chip: AppleSilicon
+          - runner: macos-15-intel
+            chip: Intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build app and disk image
+        run: bash ./build_mac.command
+      - name: Name the disk image for its chip
+        run: |
+          for f in ThreadsCollage_*.dmg; do mv "$f" "${f%.dmg}_${{ matrix.chip }}.dmg"; done
+          ls -la ./*.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-${{ matrix.chip }}
+          path: ThreadsCollage_*_${{ matrix.chip }}.dmg
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Make sure the NSIS installer builder is available
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe") -and -not (Get-Command makensis -ErrorAction SilentlyContinue)) {
+            choco install nsis -y --no-progress
+          }
+      - name: Build app and installer
+        shell: cmd
+        run: build_exe.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: ThreadsCollage_Setup_*.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish downloads
+    needs: [mac, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Version and release notes from the app's version history
+        run: |
+          python3 - <<'EOF'
+          import ast, re
+          src = open("threads_collage.py", encoding="utf-8").read()
+          ver = re.search(r'^APP_VERSION = .([0-9.]+).', src, re.M).group(1)
+          start = src.index("CHANGELOG = [") + len("CHANGELOG = ")
+          log = ast.literal_eval(src[start:src.index("\n]\n", start) + 2])
+          items = next((i for v, d, i in log if v == ver), [])
+          notes = ["## What's new in %s" % ver, ""] + ["* " + x for x in items] + [
+              "", "## Which file do I need?", "",
+              "* **Mac with Apple Silicon** (Apple menu > About This Mac shows an M chip): the `_AppleSilicon.dmg`",
+              "* **Mac with Intel**: the `_Intel.dmg`",
+              "* **Windows 10/11**: `ThreadsCollage_Setup_%s.exe`" % ver,
+              "* **Already have the app?** Download `threads_collage.py` and use *Install update...* in the app.",
+              "", "First launch on a Mac: if macOS blocks it, open System Settings > Privacy & Security and click Open Anyway.",
+              "On Windows: if SmartScreen appears, click More info > Run anyway."]
+          open("notes.md", "w", encoding="utf-8").write("\n".join(notes) + "\n")
+          open("version.txt", "w").write(ver)
+          EOF
+          cp threads_collage.py out/
+          ls -la out
+      - name: Publish on the Releases page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(cat version.txt)
+          if gh release view "v$VER" >/dev/null 2>&1; then
+            gh release upload "v$VER" out/* --clobber
+            gh release edit "v$VER" --notes-file notes.md
+          else
+            gh release create "v$VER" out/* --title "Threads Collage $VER" --notes-file notes.md
+          fi

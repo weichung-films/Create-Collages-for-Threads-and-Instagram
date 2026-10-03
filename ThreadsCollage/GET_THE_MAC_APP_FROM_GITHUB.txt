@@ -1,0 +1,65 @@
+GET THE READY MADE MAC APP (AND WINDOWS INSTALLER) FROM GITHUB
+===============================================================
+
+GitHub builds Threads Collage on its own Mac and Windows machines and gives
+you finished installers to download. Nothing needs to be installed on your
+Mac. You only use the GitHub website. About 10 minutes, once.
+
+1. CREATE A FREE ACCOUNT
+   Go to https://github.com/signup and create an account (free plan).
+
+2. CREATE A REPOSITORY (a project folder on GitHub)
+   Click the "+" at the top right > "New repository".
+   Repository name: ThreadsCollage
+   Choose Public or Private (see the note at the end), then click
+   "Create repository".
+
+3. UPLOAD THE KIT
+   On the new, empty repository page, click the link
+   "uploading an existing file".
+   Drag in every file from this unzipped kit folder, then click
+   "Commit changes" at the bottom.
+
+4. ADD THE BUILD RECIPE
+   Click "Add file" > "Create new file".
+   In the file name box type exactly:   .github/workflows/build.yml
+   (typing each "/" creates a folder; that is expected.)
+   Open GITHUB_BUILD_RECIPE.yml from this kit in TextEdit or Notepad,
+   select all, copy, and paste it into the large box on GitHub.
+   Click "Commit changes...", then "Commit changes" again.
+
+   (If your upload in step 3 already included the hidden .github folder,
+   GitHub will say the file exists; that is fine, skip this step.)
+
+5. WAIT FOR THE BUILD (about 10 to 15 minutes)
+   Click the "Actions" tab. "Build installers" is running.
+   If GitHub shows a button to enable workflows, click it, then open
+   "Build installers" and click "Run workflow".
+   A green tick means it finished.
+
+6. DOWNLOAD
+   Click the "Code" tab, then "Releases" on the right hand side, then
+   "Threads Collage 2.4.1". Under Assets:
+     * Mac with Apple Silicon (Apple menu > About This Mac shows an "M" chip):
+         ThreadsCollage_2.4.1_AppleSilicon.dmg
+     * Mac with Intel:          ThreadsCollage_2.4.1_Intel.dmg
+     * Windows 10/11:           ThreadsCollage_Setup_2.4.1.exe
+     * Already have the app?    threads_collage.py  (use "Install update...")
+
+7. INSTALL ON THE MAC
+   Open the .dmg and drag ThreadsCollage onto the Applications shortcut.
+   The first time you open it, macOS may block it because it is not from
+   the App Store: open System Settings > Privacy & Security, scroll down,
+   and click "Open Anyway". After that it opens normally.
+
+FUTURE VERSIONS
+   Computers that already have the app: use "Install update..." as usual.
+   For new installers: upload the new threads_collage.py to the repository
+   ("Add file" > "Upload files", which replaces the old one). GitHub builds
+   new installers automatically and adds them to the Releases page.
+
+PUBLIC OR PRIVATE?
+   Public repositories build for free. Private repositories use the free
+   plan's monthly allowance of build minutes, and Mac build time is charged
+   at a premium rate, so keep private builds occasional. Without a payment
+   method on file, GitHub stops a build rather than charging you.
